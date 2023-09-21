@@ -20,7 +20,7 @@ class CoffeeBase : public Coffee
     std::string description_;
 
 public:
-    CoffeeBase(float price, const std::string& description) : price_{price}, description_{description}
+    CoffeeBase(float price, const std::string& description) : price_{ price }, description_{ description }
     {
     }
 
@@ -39,7 +39,7 @@ class Espresso : public CoffeeBase
 {
 public:
     Espresso(float price = 4.0, const std::string& description = "Espresso")
-        : CoffeeBase{price, description}
+        : CoffeeBase{ price, description }
     {
     }
 
@@ -53,7 +53,7 @@ class Cappuccino : public CoffeeBase
 {
 public:
     Cappuccino(float price = 6.0, const std::string& description = "Cappuccino")
-        : CoffeeBase{price, description}
+        : CoffeeBase{ price, description }
     {
     }
 
@@ -67,13 +67,95 @@ class Latte : public CoffeeBase
 {
 public:
     Latte(float price = 8.0, const std::string& description = "Latte")
-        : CoffeeBase{price, description}
+        : CoffeeBase{ price, description }
     {
     }
 
     void prepare() override
     {
         std::cout << "Making a perfect latte.\n";
+    }
+};
+
+class WhippedDecorator : public Coffee
+{
+    std::shared_ptr<Coffee> mCoffee;
+public:
+    WhippedDecorator(std::shared_ptr<Coffee> iCoffee) : mCoffee{ iCoffee }
+    {
+    }
+
+    float get_total_price() const override
+    {
+        return mCoffee->get_total_price() + 2.5f;
+    }
+
+    std::string get_description() const override
+    {
+        std::string str = mCoffee->get_description();
+        str += " whipped";
+        return str;
+    }
+
+    void prepare() override
+    {
+        mCoffee->prepare();
+        std::cout << " whipped\n";
+    }
+};
+
+class WhiskyDecorator : public Coffee
+{
+    std::shared_ptr<Coffee> mCoffee;
+public:
+    WhiskyDecorator(std::shared_ptr<Coffee> iCoffee) : mCoffee{ iCoffee }
+    {
+
+    }
+    float get_total_price() const override
+    {
+        return mCoffee->get_total_price() + 6.0f;
+    }
+
+    std::string get_description() const override
+    {
+        std::string str = mCoffee->get_description();
+        str += " whisky";
+        return str;
+    }
+
+    void prepare() override
+    {
+        mCoffee->prepare();
+        std::cout << " with whisky\n";
+    }
+};
+
+class ExtraEspressoDecorator : public Coffee
+{
+    std::shared_ptr<Coffee> mCoffee;
+    Espresso espresso;
+public:
+    ExtraEspressoDecorator(std::shared_ptr<Coffee> iCoffee) : mCoffee{ iCoffee }
+    {
+    }
+
+    float get_total_price() const override
+    {
+        return mCoffee->get_total_price() + espresso.get_total_price();
+    }
+
+    std::string get_description() const override
+    {
+        std::string str = mCoffee->get_description();
+        str += " extra espresso";
+        return str;
+    }
+
+    void prepare() override
+    {
+        mCoffee->prepare();
+        espresso.prepare();
     }
 };
 

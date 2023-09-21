@@ -23,9 +23,18 @@ class GraphicsDoc
 
 public:
     GraphicsDoc(ShapeFactory& shape_factory, ShapeRWFactory& shape_rw_factory)
-        : shape_factory_{shape_factory}
-        , shape_rw_factory_{shape_rw_factory}
+        : shape_factory_{ shape_factory }
+        , shape_rw_factory_{ shape_rw_factory }
     {
+    }
+
+    GraphicsDoc(const GraphicsDoc& other)
+        : shapes_{}, shape_factory_{ other.shape_factory_ },
+          shape_rw_factory_{ other.shape_rw_factory_ }
+    { 
+        shapes_.reserve(other.shapes_.size());
+        for(const auto& shp : other.shapes_)
+            shapes_.push_back(shp->clone());
     }
 
     void add(unique_ptr<Shape> shp)
@@ -41,7 +50,7 @@ public:
 
     void load(const string& filename)
     {
-        ifstream file_in{filename};
+        ifstream file_in{ filename };
 
         if (!file_in)
         {
@@ -70,7 +79,7 @@ public:
 
     void save(const string& filename)
     {
-        ofstream file_out{filename};
+        ofstream file_out{ filename };
 
         for (const auto& shp : shapes_)
         {
@@ -92,8 +101,8 @@ int main()
 
     doc.render();
 
-    // TODO: Uncomment this code
-    // GraphicsDoc doc2 = doc;
+    std::cout << "------\n";
+    GraphicsDoc doc2 = doc;
 
-    // doc2.save("new_drawing.txt");
+    doc2.render();
 }

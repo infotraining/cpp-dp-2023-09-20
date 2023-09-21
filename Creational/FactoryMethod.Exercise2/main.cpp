@@ -8,6 +8,8 @@
 #include <vector>
 
 #include "shape.hpp"
+#include "rectangle.hpp"
+#include "square.hpp"
 #include "shape_factories.hpp"
 
 using namespace std;
@@ -83,7 +85,7 @@ int main()
 {
     cout << "Start..." << endl;
 
-    GraphicsDoc doc(SingletonShapeFactory::instance(), SingletonShapeRWFactory::instance());
+    GraphicsDoc doc{SingletonShapeFactory::instance(), SingletonShapeRWFactory::instance()};
 
     doc.load("drawing_fm_exercise1.txt");
 

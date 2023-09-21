@@ -40,4 +40,17 @@ int main()
 
     for (const auto& line : csv_doc)
         cout << line << endl;
+
+    cout << "///////////////////////////////////////////////////////////\n";
+
+    HtmlReportBuilder html_bld;
+
+    html_bld.add_header("TITLE")
+        .begin_data()
+            .add_row({"one", "two", "three"})
+            .add_row({"four", "five", "six"})
+        .end_data()
+        .add_footer("CPY");
+
+    std::cout << html_bld.get_report() << "\n";
 }

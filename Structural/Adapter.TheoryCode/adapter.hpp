@@ -4,48 +4,70 @@
 #include <iostream>
 
 // "Target"
-class Target
+class ISwitch
 {
 public:
-    virtual void request() = 0;
-    virtual ~Target() = default;
+    virtual void on() = 0;
+    virtual void off() = 0;
+    virtual ~ISwitch() = default;
 };
 
 // "Adaptee"
-class Adaptee
+class LedLight
 {
 public:
-    void specific_request()
+    virtual void set_rgb(int r, int g, int b)
     {
-        std::cout << "Called specific_request()" << std::endl;
+        std::cout << "RGB(" << r << ", " << g << ", " << b << ")\n";
+    }
+
+    virtual ~LedLight() = default;
+};
+
+class AmoledLight
+{
+public:
+    void set_rgb(int r, int g, int b)
+    {
+        std::cout << "Super shiny RGB(" << r << ", " << g << ", " << b << ")\n";
     }
 };
 
 // "Adapter"
-class ClassAdapter : public Target, private Adaptee
+class LedSwitchCA : public ISwitch, private LedLight
 {
 public:
-    void request() override
+    void on() override
     {
-        specific_request();
+        set_rgb(255, 255, 255);
+    }
+
+    void off() override
+    {
+        set_rgb(0, 0, 0);
     }
 };
 
 // "Adapter"
-class ObjectAdapter : public Target
+class LedSwitchOB : public ISwitch
 {
 private:
-    Adaptee& adaptee_;
+    LedLight& led_;
 
 public:
-    ObjectAdapter(Adaptee& adaptee)
-        : adaptee_(adaptee)
+    LedSwitchOB(LedLight& adaptee)
+        : led_(adaptee)
     {
     }
 
-    void request() override
+    void on() override
     {
-        adaptee_.specific_request();
+        led_.set_rgb(255, 255, 255);
+    }
+
+    void off() override
+    {
+        led_.set_rgb(0, 0, 0);
     }
 };
 

@@ -1,8 +1,13 @@
+
+
+// Mati
+
 #include <algorithm>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -31,8 +36,8 @@ class Button : public Widget
 
 public:
     Button(const std::string& caption, IconType icon_type)
-        : caption_{caption}
-        , icon_type_{icon_type}
+        : caption_{ caption }
+        , icon_type_{ icon_type }
     {
     }
 
@@ -53,7 +58,7 @@ class Menu : public Widget
 
 public:
     Menu(const std::string& text)
-        : text_{text}
+        : text_{ text }
     {
     }
 
@@ -61,6 +66,14 @@ public:
     {
         return text_;
     }
+};
+
+class WidgetsFactory
+{
+public:
+    virtual ~WidgetsFactory() {}
+    virtual std::unique_ptr<Button> create_button(const std::string& caption, IconType icon_type) = 0;
+    virtual std::unique_ptr<Menu> create_menu(const std::string& text) = 0;
 };
 
 class MotifButton : public Button
@@ -107,6 +120,56 @@ public:
     }
 };
 
+class MotifWidgetsFactory : public WidgetsFactory
+{
+    std::unique_ptr<Button> create_button(const std::string& caption, IconType icon_type) override
+    {
+        return std::make_unique<MotifButton>(caption, icon_type);
+    }
+    std::unique_ptr<Menu> create_menu(const std::string& text) override
+    {
+        return std::make_unique<MotifMenu>(text);
+    }
+};
+
+class WindowsWidgetsFactory : public WidgetsFactory
+{
+    std::unique_ptr<Button> create_button(const std::string& caption, IconType icon_type) override
+    {
+        return std::make_unique<WindowsButton>(caption, icon_type);
+    }
+    std::unique_ptr<Menu> create_menu(const std::string& text) override
+    {
+        return std::make_unique<WindowsMenu>(text);
+    }
+};
+
+namespace AlternativeTake
+{
+    std::shared_ptr<WidgetsFactory>  getButtonFactory()
+    {
+#ifdef MOTIF
+        return std::make_shared<MotifWidgetsFactory>();
+#else 
+        return std::make_shared<WindowsWidgetsFactory>();
+#endif
+    }
+
+    // class WindowOne : public Window
+    // {
+
+    // public:
+    //     WindowOne()
+    //     {
+
+    //         std::shared_ptr<WidgetsFactory> window = getButtonFactory();
+    //         window->create_button("OK", IconType::ok);
+    //         window->create_menu("File");
+    //     }
+    // };
+
+}
+
 class Window
 {
     std::vector<std::unique_ptr<Widget>> widgets;
@@ -128,43 +191,41 @@ public:
 
 class WindowOne : public Window
 {
-
+    std::shared_ptr<WidgetsFactory> widgets_factory_;
 public:
-    WindowOne()
+    WindowOne(std::shared_ptr<WidgetsFactory> widgets_factory)
+        : widgets_factory_(widgets_factory)
     {
-#ifdef MOTIF
-        add_widget(std::make_unique<MotifButton>("OK", IconType::ok));
-        add_widget(std::make_unique<MotifMenu>("File"));
-#else // WINDOWS
-        add_widget(std::make_unique<WindowsButton>("OK", IconType::ok));
-        add_widget(std::make_unique<WindowsMenu>("File"));
-#endif
+        add_widget(widgets_factory->create_button("OK", IconType::ok));
+        add_widget(widgets_factory->create_menu("File"));
     }
 };
 
 class WindowTwo : public Window
 {
-
+    std::shared_ptr<WidgetsFactory> widgets_factory_;
 public:
-    WindowTwo()
+    WindowTwo(std::shared_ptr<WidgetsFactory> widgets_factory)
+        : widgets_factory_(widgets_factory)
     {
-#ifdef MOTIF
-        add_widget(std::make_unique<MotifMenu>("Edit"));
-        add_widget(std::make_unique<MotifButton>("OK", IconType::ok));
-        add_widget(std::make_unique<MotifButton>("Cancel", IconType::cancel));
-#else // WINDOWS
-        add_widget(std::make_unique<WindowsMenu>("Edit"));
-        add_widget(std::make_unique<WindowsButton>("OK", IconType::ok));
-        add_widget(std::make_unique<WindowsButton>("Cancel", IconType::cancel));
-#endif
+        add_widget(widgets_factory->create_menu("Edit"));
+        add_widget(widgets_factory->create_button("OK", IconType::ok));
+        add_widget(widgets_factory->create_button("Cancel", IconType::cancel));
     }
 };
 
 int main(void)
 {
-    WindowOne w1;
+#ifdef MOTIF
+    std::shared_ptr<WidgetsFactory> widgets_factory = std::make_shared<MotifWidgetsFactory>();
+#else // WINDOWS
+    std::shared_ptr<WidgetsFactory> widgets_factory = std::make_shared<WindowsWidgetsFactory>();
+#endif
+
+    WindowOne w1(widgets_factory);
     w1.display();
 
-    WindowTwo w2;
+    WindowTwo w2(widgets_factory);
     w2.display();
 }
+

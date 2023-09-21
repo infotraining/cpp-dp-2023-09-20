@@ -26,6 +26,7 @@ SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIRECTORY}/lib")
 
 enable_testing()
 
+add_subdirectory(OOP)
 add_subdirectory(Creational)
 add_subdirectory(Structural)
 add_subdirectory(Behavioral)

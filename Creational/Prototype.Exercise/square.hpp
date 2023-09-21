@@ -6,7 +6,7 @@
 namespace Drawing
 {
 
-    class Square : public Shape
+    class Square : public ClonableShape<Square>
     {
         Rectangle rect_;
 

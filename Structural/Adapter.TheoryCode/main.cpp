@@ -6,9 +6,10 @@ using namespace std;
 class Client
 {
 public:
-    void do_operation(Target& t)
+    void do_operation(ISwitch& s)
     {
-        t.request();
+        s.on();
+        s.off();
     }
 };
 
@@ -17,13 +18,13 @@ int main()
     Client client;
 
     cout << "-- do_operation on ClassAdapter" << endl;
-    ClassAdapter cadapter;
-    client.do_operation(cadapter);
+    LedSwitchCA led_switch;
+    client.do_operation(led_switch);
 
     cout << endl;
 
     cout << "-- do_operation on ObjectAdapter" << endl;
-    Adaptee adaptee;
-    ObjectAdapter oadapter(adaptee);
-    client.do_operation(oadapter);
+    LedLight led;
+    LedSwitchOB adapter(led);
+    client.do_operation(adapter);
 }
