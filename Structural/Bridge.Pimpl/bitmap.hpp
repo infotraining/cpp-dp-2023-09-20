@@ -8,10 +8,9 @@
 
 class Bitmap
 {
-    char* image_;
-    size_t size_;
-
 public:
+    struct BitmapImpl;
+    std::unique_ptr<BitmapImpl> pimpl_;
     Bitmap(size_t size, char fill_char = '*');
     ~Bitmap();
 
@@ -23,5 +22,10 @@ public:
 
     void draw();
 };
+
+// inline void destroy_impl(Bitmap::BitmapImpl* ptr)
+// {
+//     delete ptr;
+// }
 
 #endif // BITMAP_HPP

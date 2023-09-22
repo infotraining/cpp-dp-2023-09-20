@@ -4,20 +4,23 @@
 
 using namespace std;
 
-Bitmap::Bitmap(size_t size, char fill_char) : image_{new char[size]}, size_{size}
+struct Bitmap::BitmapImpl
 {
-    fill_n(image_, size, fill_char);
+    std::vector<int> image_;
+};
+
+Bitmap::Bitmap(size_t size, char fill_char) : pimpl_{std::make_unique<BitmapImpl>()}
+{
+    pimpl_->image_.resize(size);
+    fill_n(pimpl_->image_.begin(), size, fill_char);
 }
 
-Bitmap::~Bitmap()
-{
-    delete[] image_;
-}
+Bitmap::~Bitmap() = default;
 
 void Bitmap::draw()
 {
     cout << "Image: ";
-    for (size_t i = 0; i < size_; ++i)
-        cout << image_[i];
+    for (size_t i = 0; i < pimpl_->image_.size(); ++i)
+        cout << pimpl_->image_[i];
     cout << endl;
 }

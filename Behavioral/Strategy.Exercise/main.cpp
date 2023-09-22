@@ -23,23 +23,80 @@ struct StatResult
 using Data = std::vector<double>;
 using Results = std::vector<StatResult>;
 
-enum StatisticsType
+
+class Analyze
 {
-    avg,
-    min_max,
-    sum
+public:
+    virtual ~Analyze() = default;
+    virtual void count(const Data& data, Results& results_) = 0;
+};
+
+class AnalyzeMinMax : public Analyze
+{
+public:
+    virtual void count(const Data& data, Results& results_)
+    {
+        double min = *(std::min_element(data.begin(), data.end()));
+        double max = *(std::max_element(data.begin(), data.end()));
+
+        results_.push_back(StatResult("Min", min));
+        results_.push_back(StatResult("Max", max));
+    }
+};
+
+class AnalyzeAvg : public Analyze
+{
+public:
+    virtual void count(const Data& data, Results& results_)
+    {
+        double sum = std::accumulate(data.begin(), data.end(), 0.0);
+        double avg = sum / data.size();
+
+        StatResult result("Avg", avg);
+        results_.push_back(result);
+    }
+};
+
+class AnalyzeSum : public Analyze
+{
+public:
+    void count(const Data& data, Results& results_) override
+    {
+        double sum = std::accumulate(data.begin(), data.end(), 0.0);
+
+        results_.push_back(StatResult("Sum", sum));
+    }
+};
+
+class StatGroup : public Analyze
+{
+    std::vector<std::shared_ptr<Analyze>> stats_;
+public:
+    void count(const Data& data, Results& results_) override
+    {
+        for(const auto& stat : stats_)
+        {
+            stat->count(data, results_);
+        }
+    }
+
+    void add(std::shared_ptr<Analyze> stat)
+    {
+        stats_.push_back(stat);
+    }
 };
 
 class DataAnalyzer
 {
-    StatisticsType stat_type_;
+    std::shared_ptr<Analyze> mAnalyze;
     Data data_;
     Results results_;
 
 public:
-    DataAnalyzer(StatisticsType stat_type)
-        : stat_type_{stat_type}
+    DataAnalyzer(std::shared_ptr<Analyze> analyze) :
+        mAnalyze(analyze)
     {
+
     }
 
     void load_data(const std::string& file_name)
@@ -60,35 +117,14 @@ public:
         std::cout << "File " << file_name << " has been loaded...\n";
     }
 
-    void set_statistics(StatisticsType stat_type)
+    void set_statistics(std::shared_ptr<Analyze> analyze)
     {
-        stat_type_ = stat_type;
+        mAnalyze = analyze;
     }
 
     void calculate()
     {
-        if (stat_type_ == avg)
-        {
-            double sum = std::accumulate(data_.begin(), data_.end(), 0.0);
-            double avg = sum / data_.size();
-
-            StatResult result("Avg", avg);
-            results_.push_back(result);
-        }
-        else if (stat_type_ == min_max)
-        {
-            double min = *(std::min_element(data_.begin(), data_.end()));
-            double max = *(std::max_element(data_.begin(), data_.end()));
-
-            results_.push_back(StatResult("Min", min));
-            results_.push_back(StatResult("Max", max));
-        }
-        else if (stat_type_ == sum)
-        {
-            double sum = std::accumulate(data_.begin(), data_.end(), 0.0);
-
-            results_.push_back(StatResult("Sum", sum));
-        }
+        mAnalyze->count(data_, results_);
     }
 
     const Results& results() const
@@ -105,16 +141,18 @@ void show_results(const Results& results)
 
 int main()
 {
-    DataAnalyzer da{avg};
+    auto avg = std::make_shared<AnalyzeAvg>();
+    auto min_max = std::make_shared<AnalyzeMinMax>();
+    auto sum = std::make_shared<AnalyzeSum>();
+
+    auto std_group = std::make_shared<StatGroup>();
+    std_group->add(avg);
+    std_group->add(min_max);
+    std_group->add(sum);
+
+    DataAnalyzer da{ std_group };
     da.load_data("stats_data.dat");
-
-    da.calculate();
-
-    da.set_statistics(min_max);
-    da.calculate();
-
-    da.set_statistics(sum);
-    da.calculate();
+    da.calculate();    
 
     show_results(da.results());
 
