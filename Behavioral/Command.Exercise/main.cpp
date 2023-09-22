@@ -15,7 +15,7 @@ int main()
 
     auto app = injector.create<Application>();
 
-    app.add_command("Print"s, injector.create<std::shared_ptr<PrintCmd>>());
+    app.add_command("Print"s, injector.create<std::shared_ptr<PrintCmd>>());    
     app.add_command("ToUpper"s, injector.create<std::shared_ptr<ToUpperCmd>>());
     app.add_command("Clear"s, injector.create<std::shared_ptr<ClearCmd>>());
     app.add_command("AddText"s, injector.create<std::shared_ptr<AddTextCmd>>());

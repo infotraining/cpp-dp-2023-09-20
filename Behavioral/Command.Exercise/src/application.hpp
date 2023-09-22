@@ -54,7 +54,7 @@ public:
         to_upper(name);
         cmds_.emplace(std::move(name), cmd);
     }
-public:
+private:
     void to_upper(std::string& text)
     {
         std::transform(text.begin(), text.end(), text.begin(), [](auto c) { return std::toupper(c);});
