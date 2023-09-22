@@ -19,7 +19,7 @@ class Stock
 private:
     std::string symbol_;
     double price_;
-    // TODO - kontener przechowywujacy obserwatorow
+    // TODO - kontener przechowujacy obserwatorow
 public:
     Stock(const std::string& symbol, double price) : symbol_(symbol), price_(price)
     {
